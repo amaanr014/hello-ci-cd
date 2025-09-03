@@ -1,14 +1,11 @@
 name: CI
-
 on:
   push:
-    branches: ["**"]
   pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -17,14 +14,22 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "pip"
+          cache: pip
 
-      - name: Install deps
-        run: pip install -r requirements.txt
+      - name: Show working directory (debug)
+        run: |
+          pwd
+          ls -R
 
-      - name: Run tests
-        run: pytest -q --disable-warnings --maxfail=1
+      - name: Upgrade pip & install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Placeholder deploy step
-        if: ${{ success() }}
-        run: echo "Deployment successful!"
+      - name: Show pytest version (debug)
+        run: python -m pytest --version
+
+      - name: Run tests (verbose)
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m pytest -vv
